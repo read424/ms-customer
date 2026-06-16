@@ -1,0 +1,152 @@
+openapi: 3.0.3
+
+info:
+  title: Customer API
+  version: v1
+
+tags:
+  - name: Customer
+    description: Customer operations
+
+paths:
+
+  /api/v1/customers:
+
+    get:
+      operationId: findAllCustomers
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: Customers found
+
+    post:
+      operationId: createCustomer
+      tags:
+        - Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '201':
+          description: Customer created
+
+  /api/v1/customers/{customerId}:
+
+    parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: findCustomerById
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: Customer found
+
+    put:
+      operationId: updateCustomer
+      tags:
+        - Customer
+      responses:
+        '200':
+          description: Customer updated
+
+    delete:
+      operationId: deleteCustomer
+      tags:
+        - Customer
+      responses:
+        '204':
+          description: Customer deleted
+
+components:
+
+  schemas:
+
+    CreateCustomerRequest:
+      type: object
+      required:
+        - customerType
+        - documentType
+        - documentNumber
+      properties:
+        customerType:
+          type: string
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        businessName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+
+    CustomerResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+        customerType:
+          $ref: '#/components/schemas/CustomerType'
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentNumber:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        businessName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        businessName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+
+    CustomerType:
+      type: string
+      enum:
+        - PERSONAL
+        - BUSINESS
+
+    DocumentType:
+      type: string
+      enum:
+        - DNI
+        - CE
+        - PASSPORT
+        - RUC
+
+    CustomerStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
