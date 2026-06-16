@@ -23,25 +23,3 @@ management:
   endpoint:
     health:
       show-details: always
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/ms_customer
-      auto-index-creation: true
-  jackson:
-    default-property-inclusion: non_null
-    serialization:
-      write-dates-as-timestamps: false
-
-server:
-  port: 8080
-  servlet:
-    context-path: /
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
