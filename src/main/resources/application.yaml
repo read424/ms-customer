@@ -1,6 +1,9 @@
 spring:
   application:
     name: ms-customer
+  cloud:
+    config:
+      enabled: false
   data:
     mongodb:
       uri: mongodb://localhost:27017/ms_customer
@@ -11,15 +14,22 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: 8080
-  servlet:
-    context-path: /
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
