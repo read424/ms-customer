@@ -342,4 +342,256 @@ class CustomerServiceTest {
 
         verify(customerRepositoryPort, times(0)).removeCustomerById(anyString());
     }
+
+    @Test
+    @DisplayName("Debe fallar al actualizar cliente PERSONAL con estado INACTIVE")
+    void testUpdatePersonalCustomerInactiveStatus() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .firstName("Juan Pablo")
+                .build();
+
+        Customer inactiveCustomer = Customer.builder()
+                .customerId("customer-123")
+                .customerType(CustomerType.PERSONAL)
+                .documentType(DocumentType.DNI)
+                .documentNumber("12345678")
+                .firstName("Juan")
+                .lastName("Pérez")
+                .status(CustomerStatus.INACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(inactiveCustomer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-123", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al actualizar cliente BUSINESS con estado INACTIVE")
+    void testUpdateBusinessCustomerInactiveStatus() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .email("newemail@example.com")
+                .build();
+
+        Customer inactiveCustomer = Customer.builder()
+                .customerId("customer-456")
+                .customerType(CustomerType.BUSINESS)
+                .documentType(DocumentType.RUC)
+                .documentNumber("20123456789")
+                .businessName("Empresa S.A.")
+                .email("business@example.com")
+                .status(CustomerStatus.INACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-456")).thenReturn(Mono.just(inactiveCustomer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-456", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-456");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al intentar actualizar businessName en cliente PERSONAL")
+    void testUpdatePersonalCustomerBusinessName() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .businessName("Invalid Name")
+                .build();
+
+        Customer customer = Customer.builder()
+                .customerId("customer-123")
+                .customerType(CustomerType.PERSONAL)
+                .documentType(DocumentType.DNI)
+                .documentNumber("12345678")
+                .firstName("Juan")
+                .lastName("Pérez")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(customer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-123", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al intentar actualizar documentNumber en cliente BUSINESS")
+    void testUpdateBusinessCustomerDocumentNumber() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .documentNumber("20987654321")
+                .build();
+
+        Customer customer = Customer.builder()
+                .customerId("customer-456")
+                .customerType(CustomerType.BUSINESS)
+                .documentType(DocumentType.RUC)
+                .documentNumber("20123456789")
+                .businessName("Empresa S.A.")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-456")).thenReturn(Mono.just(customer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-456", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-456");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al intentar actualizar firstName en cliente BUSINESS")
+    void testUpdateBusinessCustomerFirstName() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .firstName("Juan")
+                .build();
+
+        Customer customer = Customer.builder()
+                .customerId("customer-456")
+                .customerType(CustomerType.BUSINESS)
+                .documentType(DocumentType.RUC)
+                .documentNumber("20123456789")
+                .businessName("Empresa S.A.")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-456")).thenReturn(Mono.just(customer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-456", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-456");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al intentar actualizar lastName en cliente BUSINESS")
+    void testUpdateBusinessCustomerLastName() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .lastName("Pérez")
+                .build();
+
+        Customer customer = Customer.builder()
+                .customerId("customer-456")
+                .customerType(CustomerType.BUSINESS)
+                .documentType(DocumentType.RUC)
+                .documentNumber("20123456789")
+                .businessName("Empresa S.A.")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-456")).thenReturn(Mono.just(customer));
+
+        StepVerifier.create(customerService.updateCustomer("customer-456", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-456");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe permitir actualizar email y phoneNumber en cliente PERSONAL")
+    void testUpdatePersonalCustomerAllowedFields() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .email("newemail@example.com")
+                .phoneNumber("999999999")
+                .build();
+
+        Customer existingCustomer = Customer.builder()
+                .customerId("customer-123")
+                .customerType(CustomerType.PERSONAL)
+                .documentType(DocumentType.DNI)
+                .documentNumber("12345678")
+                .firstName("Juan")
+                .lastName("Pérez")
+                .email("juan@example.com")
+                .phoneNumber("987654321")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(existingCustomer));
+        when(customerRepositoryPort.storeCustomer(any(Customer.class))).thenReturn(Mono.just(existingCustomer));
+        when(cachePort.invalidateCustomerDetailCache("customer-123")).thenReturn(Mono.empty());
+        when(cachePort.invalidateAllCustomerListCaches()).thenReturn(Mono.empty());
+
+        StepVerifier.create(customerService.updateCustomer("customer-123", updateDto))
+                .expectNextMatches(updated -> updated.getEmail().equals("newemail@example.com") && updated.getPhoneNumber().equals("999999999"))
+                .verifyComplete();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(1)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe permitir actualizar email y phoneNumber en cliente BUSINESS")
+    void testUpdateBusinessCustomerAllowedFields() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .email("newemail@business.com")
+                .phoneNumber("555555555")
+                .build();
+
+        Customer existingCustomer = Customer.builder()
+                .customerId("customer-456")
+                .customerType(CustomerType.BUSINESS)
+                .documentType(DocumentType.RUC)
+                .documentNumber("20123456789")
+                .businessName("Empresa S.A.")
+                .email("business@example.com")
+                .phoneNumber("987654321")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-456")).thenReturn(Mono.just(existingCustomer));
+        when(customerRepositoryPort.storeCustomer(any(Customer.class))).thenReturn(Mono.just(existingCustomer));
+        when(cachePort.invalidateCustomerDetailCache("customer-456")).thenReturn(Mono.empty());
+        when(cachePort.invalidateAllCustomerListCaches()).thenReturn(Mono.empty());
+
+        StepVerifier.create(customerService.updateCustomer("customer-456", updateDto))
+                .expectNextMatches(updated -> updated.getEmail().equals("newemail@business.com") && updated.getPhoneNumber().equals("555555555"))
+                .verifyComplete();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-456");
+        verify(customerRepositoryPort, times(1)).storeCustomer(any(Customer.class));
+    }
+
+    @Test
+    @DisplayName("Debe fallar al intentar cambiar documentNumber por uno duplicado")
+    void testUpdateCustomerDuplicateDocumentNumber() {
+        UpdateCustomerDto updateDto = UpdateCustomerDto.builder()
+                .documentNumber("99999999")
+                .build();
+
+        Customer existingCustomer = Customer.builder()
+                .customerId("customer-123")
+                .customerType(CustomerType.PERSONAL)
+                .documentType(DocumentType.DNI)
+                .documentNumber("12345678")
+                .firstName("Juan")
+                .lastName("Pérez")
+                .status(CustomerStatus.ACTIVE)
+                .build();
+
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(existingCustomer));
+        when(customerRepositoryPort.hasCustomerWithDocumentNumber("99999999")).thenReturn(Mono.just(true));
+
+        StepVerifier.create(customerService.updateCustomer("customer-123", updateDto))
+                .expectError(InvalidCustomerDataException.class)
+                .verify();
+
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
+    }
 }
