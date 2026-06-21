@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateCustomerDto {
 
+    private String documentNumber;
     private String firstName;
     private String lastName;
     private String businessName;
