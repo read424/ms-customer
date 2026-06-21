@@ -9,17 +9,36 @@ tags:
     description: Customer operations
 
 paths:
-
   /api/v1/customers:
-
     get:
       operationId: findAllCustomers
       tags:
         - Customer
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CustomerType'
       responses:
         '200':
           description: Customers found
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPageResponse'
     post:
       operationId: createCustomer
       tags:
@@ -33,6 +52,10 @@ paths:
       responses:
         '201':
           description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
 
   /api/v1/customers/{customerId}:
 
@@ -42,7 +65,6 @@ paths:
         required: true
         schema:
           type: string
-
     get:
       operationId: findCustomerById
       tags:
@@ -50,6 +72,12 @@ paths:
       responses:
         '200':
           description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Customer not found - the customerId does not exist
 
     put:
       operationId: updateCustomer
@@ -68,9 +96,7 @@ paths:
           description: Customer deleted
 
 components:
-
   schemas:
-
     CreateCustomerRequest:
       type: object
       required:
@@ -79,9 +105,9 @@ components:
         - documentNumber
       properties:
         customerType:
-          type: string
+          $ref: '#/components/schemas/CustomerType'
         documentType:
-          type: string
+          $ref: '#/components/schemas/DocumentType'
         documentNumber:
           type: string
         firstName:
@@ -92,6 +118,7 @@ components:
           type: string
         email:
           type: string
+          format: email
         phoneNumber:
           type: string
 
@@ -145,8 +172,20 @@ components:
         - PASSPORT
         - RUC
 
-    CustomerStatus:
-      type: string
-      enum:
-        - ACTIVE
-        - INACTIVE
+    CustomerPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerResponse'
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        isLast:
+          type: boolean
