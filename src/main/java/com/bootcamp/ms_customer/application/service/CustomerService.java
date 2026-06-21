@@ -79,8 +79,17 @@ public class CustomerService implements ManageCustomerUseCase {
     public Mono<Customer> updateCustomer(String customerId, UpdateCustomerDto updateDto) {
         return findCustomerById(customerId)
                 .flatMap(existingCustomer -> {
-                    applyUpdateFields(existingCustomer, updateDto);
-                    return customerRepositoryPort.storeCustomer(existingCustomer);
+                    try {
+                        validateCustomerIsActive(existingCustomer);
+                        validateUpdateFields(existingCustomer, updateDto);
+                    } catch (InvalidCustomerDataException e) {
+                        return Mono.error(e);
+                    }
+                    return validateDocumentNumberUniquenessForUpdate(existingCustomer, updateDto)
+                            .flatMap(unused -> {
+                                applyUpdateFields(existingCustomer, updateDto);
+                                return customerRepositoryPort.storeCustomer(existingCustomer);
+                            });
                 })
                 .flatMap(updated -> cachePort.invalidateCustomerDetailCache(customerId)
                         .then(cachePort.invalidateAllCustomerListCaches())
@@ -129,11 +138,74 @@ public class CustomerService implements ManageCustomerUseCase {
                 });
     }
 
+    private void validateCustomerIsActive(Customer customer) {
+        if (customer.getStatus() != null && !customer.getStatus().equals(com.bootcamp.ms_customer.domain.model.enums.CustomerStatus.ACTIVE)) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar un cliente con estado " + customer.getStatus() + ". El cliente debe estar ACTIVE");
+        }
+    }
+
+    private void validateUpdateFields(Customer customer, UpdateCustomerDto updateDto) {
+        if (customer.getCustomerType() == null) {
+            throw new InvalidCustomerDataException("Tipo de cliente no definido");
+        }
+
+        switch (customer.getCustomerType()) {
+            case PERSONAL -> validatePersonalCustomerUpdate(updateDto);
+            case BUSINESS -> validateBusinessCustomerUpdate(updateDto);
+        }
+    }
+
+    private void validatePersonalCustomerUpdate(UpdateCustomerDto updateDto) {
+        // PERSONAL: permite actualizar documentNumber, firstName, lastName, email, phoneNumber
+        // No permite actualizar businessName
+        if (updateDto.getBusinessName() != null) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar 'businessName' en un cliente de tipo PERSONAL");
+        }
+    }
+
+    private void validateBusinessCustomerUpdate(UpdateCustomerDto updateDto) {
+        // BUSINESS: solo permite actualizar email y phoneNumber
+        // No permite actualizar documentNumber, firstName, lastName, businessName
+        if (updateDto.getDocumentNumber() != null) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar 'documentNumber' en un cliente de tipo BUSINESS");
+        }
+        if (updateDto.getFirstName() != null) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar 'firstName' en un cliente de tipo BUSINESS");
+        }
+        if (updateDto.getLastName() != null) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar 'lastName' en un cliente de tipo BUSINESS");
+        }
+        if (updateDto.getBusinessName() != null) {
+            throw new InvalidCustomerDataException(
+                    "No se puede actualizar 'businessName' después de la creación del cliente");
+        }
+    }
+
+    private Mono<Boolean> validateDocumentNumberUniquenessForUpdate(Customer customer, UpdateCustomerDto updateDto) {
+        if (updateDto.getDocumentNumber() == null || updateDto.getDocumentNumber().equals(customer.getDocumentNumber())) {
+            return Mono.just(true);
+        }
+
+        return customerRepositoryPort.hasCustomerWithDocumentNumber(updateDto.getDocumentNumber())
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.error(new InvalidCustomerDataException(
+                                "Ya existe otro cliente con el número de documento: " + updateDto.getDocumentNumber()));
+                    }
+                    return Mono.just(true);
+                });
+    }
+
     private void applyUpdateFields(Customer customer, UpdateCustomerDto updateDto) {
-        if (updateDto.getFirstName() != null)    customer.setFirstName(updateDto.getFirstName());
-        if (updateDto.getLastName() != null)     customer.setLastName(updateDto.getLastName());
-        if (updateDto.getBusinessName() != null) customer.setBusinessName(updateDto.getBusinessName());
-        if (updateDto.getEmail() != null)        customer.setEmail(updateDto.getEmail());
-        if (updateDto.getPhoneNumber() != null)  customer.setPhoneNumber(updateDto.getPhoneNumber());
+        if (updateDto.getDocumentNumber() != null)  customer.setDocumentNumber(updateDto.getDocumentNumber());
+        if (updateDto.getFirstName() != null)       customer.setFirstName(updateDto.getFirstName());
+        if (updateDto.getLastName() != null)        customer.setLastName(updateDto.getLastName());
+        if (updateDto.getEmail() != null)           customer.setEmail(updateDto.getEmail());
+        if (updateDto.getPhoneNumber() != null)     customer.setPhoneNumber(updateDto.getPhoneNumber());
     }
 }

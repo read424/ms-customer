@@ -5,10 +5,13 @@ import com.bootcamp.customer.dto.CreateCustomerRequest;
 import com.bootcamp.customer.dto.CustomerPageResponse;
 import com.bootcamp.customer.dto.CustomerResponse;
 import com.bootcamp.customer.dto.CustomerType;
+import com.bootcamp.customer.dto.UpdateCustomerRequest;
 import com.bootcamp.ms_customer.application.ports.input.ManageCustomerUseCase;
 import com.bootcamp.ms_customer.domain.model.exception.CustomerNotFoundException;
+import com.bootcamp.ms_customer.domain.model.exception.InvalidCustomerDataException;
 import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.CreateCustomerMapper;
 import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.CustomerResponseMapper;
+import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.UpdateCustomerMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ public class CustomerController implements CustomerApi {
 
     private final ManageCustomerUseCase customerService;
     private final CreateCustomerMapper createCustomerMapper;
+    private final UpdateCustomerMapper updateCustomerMapper;
     private final CustomerResponseMapper customerResponseMapper;
 
     @Override
@@ -79,10 +83,23 @@ public class CustomerController implements CustomerApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> updateCustomer(
+    public Mono<ResponseEntity<CustomerResponse>> updateCustomer(
             String customerId,
+            Mono<UpdateCustomerRequest> updateCustomerRequest,
             ServerWebExchange exchange) {
-        return Mono.empty().then(Mono.just(ResponseEntity.ok().<Void>build()));
+        return updateCustomerRequest
+                .flatMap(request -> customerService.updateCustomer(customerId, updateCustomerMapper.toDomainDto(request))
+                        .map(customerResponseMapper::toResponse)
+                        .map(ResponseEntity::ok))
+                .onErrorResume(error -> {
+                    if (error instanceof CustomerNotFoundException) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+                    if (error instanceof InvalidCustomerDataException) {
+                        return Mono.just(ResponseEntity.badRequest().build());
+                    }
+                    return Mono.error(error);
+                });
     }
 
     @Override

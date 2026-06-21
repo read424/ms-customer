@@ -83,9 +83,23 @@ paths:
       operationId: updateCustomer
       tags:
         - Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
       responses:
         '200':
           description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Invalid request - customer is inactive or invalid fields provided
+        '404':
+          description: Customer not found
 
     delete:
       operationId: deleteCustomer
@@ -147,16 +161,25 @@ components:
     UpdateCustomerRequest:
       type: object
       properties:
+        documentNumber:
+          type: string
+          description: Only updatable for PERSONAL customers
         firstName:
           type: string
+          description: Only updatable for PERSONAL customers
         lastName:
           type: string
+          description: Only updatable for PERSONAL customers
         businessName:
           type: string
+          description: Not updatable after creation
         email:
           type: string
+          format: email
+          description: Updatable for both PERSONAL and BUSINESS customers
         phoneNumber:
           type: string
+          description: Updatable for both PERSONAL and BUSINESS customers
 
     CustomerType:
       type: string
