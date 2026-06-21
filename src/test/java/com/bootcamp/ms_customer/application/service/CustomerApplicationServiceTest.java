@@ -69,15 +69,15 @@ class CustomerApplicationServiceTest {
                 .build();
 
         when(customerDomainService.createCustomer(createDto)).thenReturn(customer);
-        when(customerRepositoryPort.existsByDocumentNumber("12345678")).thenReturn(Mono.just(false));
-        when(customerRepositoryPort.save(any(Customer.class))).thenReturn(Mono.just(customer));
+        when(customerRepositoryPort.hasCustomerWithDocumentNumber("12345678")).thenReturn(Mono.just(false));
+        when(customerRepositoryPort.storeCustomer(any(Customer.class))).thenReturn(Mono.just(customer));
 
         StepVerifier.create(customerApplicationService.createCustomer(createDto))
                 .expectNext(customer)
                 .verifyComplete();
 
-        verify(customerRepositoryPort, times(1)).existsByDocumentNumber("12345678");
-        verify(customerRepositoryPort, times(1)).save(any(Customer.class));
+        verify(customerRepositoryPort, times(1)).hasCustomerWithDocumentNumber("12345678");
+        verify(customerRepositoryPort, times(1)).storeCustomer(any(Customer.class));
     }
 
     @Test
@@ -99,14 +99,14 @@ class CustomerApplicationServiceTest {
                 .build();
 
         when(customerDomainService.createCustomer(createDto)).thenReturn(customer);
-        when(customerRepositoryPort.existsByDocumentNumber("12345678")).thenReturn(Mono.just(true));
+        when(customerRepositoryPort.hasCustomerWithDocumentNumber("12345678")).thenReturn(Mono.just(true));
 
         StepVerifier.create(customerApplicationService.createCustomer(createDto))
                 .expectError(InvalidCustomerDataException.class)
                 .verify();
 
-        verify(customerRepositoryPort, times(1)).existsByDocumentNumber("12345678");
-        verify(customerRepositoryPort, times(0)).save(any(Customer.class));
+        verify(customerRepositoryPort, times(1)).hasCustomerWithDocumentNumber("12345678");
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
     }
 
     @Test
@@ -120,25 +120,25 @@ class CustomerApplicationServiceTest {
                 .status(CustomerStatus.ACTIVE)
                 .build();
 
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.just(customer));
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(customer));
 
         StepVerifier.create(customerApplicationService.findCustomerById("customer-123"))
                 .expectNext(customer)
                 .verifyComplete();
 
-        verify(customerRepositoryPort, times(1)).findById("customer-123");
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
     }
 
     @Test
     @DisplayName("Debe fallar al obtener cliente no encontrado")
     void testFindCustomerByIdNotFound() {
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.empty());
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.empty());
 
         StepVerifier.create(customerApplicationService.findCustomerById("customer-123"))
                 .expectError(CustomerNotFoundException.class)
                 .verify();
 
-        verify(customerRepositoryPort, times(1)).findById("customer-123");
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
     }
 
     @Test
@@ -160,14 +160,14 @@ class CustomerApplicationServiceTest {
                 .businessName("Empresa S.A.")
                 .build();
 
-        when(customerRepositoryPort.findAll()).thenReturn(Flux.just(customer1, customer2));
+        when(customerRepositoryPort.getAllCustomers()).thenReturn(Flux.just(customer1, customer2));
 
         StepVerifier.create(customerApplicationService.findAllCustomers())
                 .expectNext(customer1)
                 .expectNext(customer2)
                 .verifyComplete();
 
-        verify(customerRepositoryPort, times(1)).findAll();
+        verify(customerRepositoryPort, times(1)).getAllCustomers();
     }
 
     @Test
@@ -200,15 +200,15 @@ class CustomerApplicationServiceTest {
                 .status(CustomerStatus.ACTIVE)
                 .build();
 
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.just(existingCustomer));
-        when(customerRepositoryPort.save(any(Customer.class))).thenReturn(Mono.just(updatedCustomer));
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(existingCustomer));
+        when(customerRepositoryPort.storeCustomer(any(Customer.class))).thenReturn(Mono.just(updatedCustomer));
 
         StepVerifier.create(customerApplicationService.updateCustomer("customer-123", updateDto))
                 .expectNext(updatedCustomer)
                 .verifyComplete();
 
-        verify(customerRepositoryPort, times(1)).findById("customer-123");
-        verify(customerRepositoryPort, times(1)).save(any(Customer.class));
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(1)).storeCustomer(any(Customer.class));
     }
 
     @Test
@@ -216,13 +216,13 @@ class CustomerApplicationServiceTest {
     void testUpdateCustomerNotFound() {
         UpdateCustomerDto updateDto = UpdateCustomerDto.builder().firstName("Juan").build();
 
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.empty());
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.empty());
 
         StepVerifier.create(customerApplicationService.updateCustomer("customer-123", updateDto))
                 .expectError(CustomerNotFoundException.class)
                 .verify();
 
-        verify(customerRepositoryPort, times(0)).save(any(Customer.class));
+        verify(customerRepositoryPort, times(0)).storeCustomer(any(Customer.class));
     }
 
     @Test
@@ -235,25 +235,25 @@ class CustomerApplicationServiceTest {
                 .documentNumber("12345678")
                 .build();
 
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.just(customer));
-        when(customerRepositoryPort.deleteById("customer-123")).thenReturn(Mono.empty());
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.just(customer));
+        when(customerRepositoryPort.removeCustomerById("customer-123")).thenReturn(Mono.empty());
 
         StepVerifier.create(customerApplicationService.deleteCustomer("customer-123"))
                 .verifyComplete();
 
-        verify(customerRepositoryPort, times(1)).findById("customer-123");
-        verify(customerRepositoryPort, times(1)).deleteById("customer-123");
+        verify(customerRepositoryPort, times(1)).getCustomerById("customer-123");
+        verify(customerRepositoryPort, times(1)).removeCustomerById("customer-123");
     }
 
     @Test
     @DisplayName("Debe fallar al eliminar cliente no encontrado")
     void testDeleteCustomerNotFound() {
-        when(customerRepositoryPort.findById("customer-123")).thenReturn(Mono.empty());
+        when(customerRepositoryPort.getCustomerById("customer-123")).thenReturn(Mono.empty());
 
         StepVerifier.create(customerApplicationService.deleteCustomer("customer-123"))
                 .expectError(CustomerNotFoundException.class)
                 .verify();
 
-        verify(customerRepositoryPort, times(0)).deleteById(anyString());
+        verify(customerRepositoryPort, times(0)).removeCustomerById(anyString());
     }
 }
