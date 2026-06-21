@@ -95,9 +95,6 @@ public class CustomerController implements CustomerApi {
                     if (error instanceof CustomerNotFoundException) {
                         return Mono.just(ResponseEntity.notFound().build());
                     }
-                    if (error instanceof InvalidCustomerDataException) {
-                        return Mono.just(ResponseEntity.badRequest().build());
-                    }
                     return Mono.error(error);
                 });
     }
