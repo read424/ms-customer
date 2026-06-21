@@ -24,18 +24,18 @@ public class CustomerApplicationService implements CustomerServicePort {
     public Mono<Customer> createCustomer(CreateCustomerDto createDto) {
         return Mono.fromCallable(() -> customerDomainService.createCustomer(createDto))
                 .flatMap(customer -> checkDocumentNumberNotExists(customer.getDocumentNumber())
-                        .flatMap(notExists -> customerRepositoryPort.save(customer)));
+                        .flatMap(notExists -> customerRepositoryPort.storeCustomer(customer)));
     }
 
     @Override
     public Mono<Customer> findCustomerById(String customerId) {
-        return customerRepositoryPort.findById(customerId)
+        return customerRepositoryPort.getCustomerById(customerId)
                 .switchIfEmpty(Mono.error(new CustomerNotFoundException(customerId)));
     }
 
     @Override
     public Flux<Customer> findAllCustomers() {
-        return customerRepositoryPort.findAll();
+        return customerRepositoryPort.getAllCustomers();
     }
 
     @Override
@@ -43,18 +43,18 @@ public class CustomerApplicationService implements CustomerServicePort {
         return findCustomerById(customerId)
                 .flatMap(existingCustomer -> {
                     customerDomainService.updateCustomer(existingCustomer, updateDto);
-                    return customerRepositoryPort.save(existingCustomer);
+                    return customerRepositoryPort.storeCustomer(existingCustomer);
                 });
     }
 
     @Override
     public Mono<Void> deleteCustomer(String customerId) {
         return findCustomerById(customerId)
-                .flatMap(customer -> customerRepositoryPort.deleteById(customerId));
+                .flatMap(customer -> customerRepositoryPort.removeCustomerById(customerId));
     }
 
     private Mono<Boolean> checkDocumentNumberNotExists(String documentNumber) {
-        return customerRepositoryPort.existsByDocumentNumber(documentNumber)
+        return customerRepositoryPort.hasCustomerWithDocumentNumber(documentNumber)
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(new InvalidCustomerDataException(
