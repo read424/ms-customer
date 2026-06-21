@@ -3,11 +3,13 @@ package com.bootcamp.ms_customer.infrastructure.config;
 import com.bootcamp.ms_customer.domain.model.exception.CustomerNotFoundException;
 import com.bootcamp.ms_customer.domain.model.exception.InvalidCustomerDataException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -28,6 +30,23 @@ public class GlobalExceptionHandler {
             ServerWebExchange exchange) {
         log.warn("Datos inválidos del cliente: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, "Datos Inválidos", exchange);
+    }
+
+    @ExceptionHandler(ServerWebInputException.class)
+    public ResponseEntity<ErrorResponse> handleServerWebInputException(
+            ServerWebInputException ex,
+            ServerWebExchange exchange) {
+        log.warn("Error de entrada de datos: {}", ex.getMessage());
+        String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+        return buildErrorResponse(message, HttpStatus.BAD_REQUEST, "Petición Incorrecta", exchange);
+    }
+
+    @ExceptionHandler(DecodingException.class)
+    public ResponseEntity<ErrorResponse> handleDecodingException(
+            DecodingException ex,
+            ServerWebExchange exchange) {
+        log.warn("Error de decodificación JSON: {}", ex.getMessage());
+        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, "Error de Decodificación JSON", exchange);
     }
 
     @ExceptionHandler(Exception.class)

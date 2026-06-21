@@ -4,6 +4,7 @@ import com.bootcamp.ms_customer.domain.model.Customer;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerStatus;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerType;
 import com.bootcamp.ms_customer.domain.model.enums.DocumentType;
+import com.bootcamp.ms_customer.infrastructure.adapters.outbound.persistence.CustomerRepositoryAdapter;
 import com.bootcamp.ms_customer.infrastructure.adapters.outbound.persistence.entity.CustomerEntity;
 import com.bootcamp.ms_customer.infrastructure.adapters.outbound.persistence.mapper.CustomerPersistenceMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +66,7 @@ class CustomerRepositoryAdapterTest {
         when(springDataRepository.save(entity)).thenReturn(Mono.just(entity));
         when(customerPersistenceMapper.toDomain(entity)).thenReturn(customer);
 
-        StepVerifier.create(customerRepositoryAdapter.save(customer))
+        StepVerifier.create(customerRepositoryAdapter.storeCustomer(customer))
                 .expectNext(customer)
                 .verifyComplete();
 
@@ -96,7 +97,7 @@ class CustomerRepositoryAdapterTest {
         when(springDataRepository.findById("customer-123")).thenReturn(Mono.just(entity));
         when(customerPersistenceMapper.toDomain(entity)).thenReturn(customer);
 
-        StepVerifier.create(customerRepositoryAdapter.findById("customer-123"))
+        StepVerifier.create(customerRepositoryAdapter.getCustomerById("customer-123"))
                 .expectNext(customer)
                 .verifyComplete();
 
@@ -108,7 +109,7 @@ class CustomerRepositoryAdapterTest {
     void testFindByIdNotFound() {
         when(springDataRepository.findById("customer-123")).thenReturn(Mono.empty());
 
-        StepVerifier.create(customerRepositoryAdapter.findById("customer-123"))
+        StepVerifier.create(customerRepositoryAdapter.getCustomerById("customer-123"))
                 .verifyComplete();
 
         verify(springDataRepository, times(1)).findById("customer-123");
@@ -136,7 +137,7 @@ class CustomerRepositoryAdapterTest {
         when(springDataRepository.findAll()).thenReturn(Flux.just(entity1));
         when(customerPersistenceMapper.toDomain(entity1)).thenReturn(customer1);
 
-        StepVerifier.create(customerRepositoryAdapter.findAll())
+        StepVerifier.create(customerRepositoryAdapter.getAllCustomers())
                 .expectNext(customer1)
                 .verifyComplete();
 
@@ -148,7 +149,7 @@ class CustomerRepositoryAdapterTest {
     void testDeleteByIdSuccess() {
         when(springDataRepository.deleteById("customer-123")).thenReturn(Mono.empty());
 
-        StepVerifier.create(customerRepositoryAdapter.deleteById("customer-123"))
+        StepVerifier.create(customerRepositoryAdapter.removeCustomerById("customer-123"))
                 .verifyComplete();
 
         verify(springDataRepository, times(1)).deleteById("customer-123");
@@ -159,7 +160,7 @@ class CustomerRepositoryAdapterTest {
     void testExistsByDocumentNumber() {
         when(springDataRepository.existsByDocumentNumber("12345678")).thenReturn(Mono.just(true));
 
-        StepVerifier.create(customerRepositoryAdapter.existsByDocumentNumber("12345678"))
+        StepVerifier.create(customerRepositoryAdapter.hasCustomerWithDocumentNumber("12345678"))
                 .expectNext(true)
                 .verifyComplete();
 
