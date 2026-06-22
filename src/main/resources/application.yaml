@@ -1,9 +1,8 @@
 spring:
   application:
     name: ms-customer
-  cloud:
-    config:
-      enabled: false
+  config:
+    import: configserver:http://localhost:8888
   data:
     mongodb:
       uri: mongodb://localhost:27017/ms_customer
@@ -11,7 +10,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      timeout: 60000ms
+      timeout: 60s
   jackson:
     default-property-inclusion: non_null
     serialization:
@@ -36,6 +35,8 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: always
 
 cache:
