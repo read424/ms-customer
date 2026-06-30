@@ -1,0 +1,91 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:8.3.4
+    container_name: mongodb-prod
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: bootcamp_accounts_prod_2024
+      MONGO_INITDB_DATABASE: ms_customer_prod
+    volumes:
+      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bootcamp-network
+    healthcheck:
+      test: echo 'db.adminCommand("ping")' | mongosh -u admin -p bootcamp_accounts_prod_2024 localhost:27017/admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: db-cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bootcamp-network
+    healthcheck:
+      test: redis-cli -a eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81 ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ms-customer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ms-customer:latest
+    container_name: ms-customer
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATA_MONGODB_HOST: mongodb-prod
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: ms_customer_prod
+      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: bootcamp_accounts_prod_2024
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://service-eureka:8761/eureka/
+      SPRING_REDIS_HOST: db-cache
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      JAVA_OPTS: -Xmx512m -Xms256m
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bootcamp-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  bootcamp-network:
+    name: bootcamp-network
+    external: true
