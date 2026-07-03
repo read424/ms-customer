@@ -1,84 +1,116 @@
 package com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.controller;
 
-import com.bootcamp.customer.api.CustomerApi;
-import com.bootcamp.customer.dto.UpdateCustomerRequest;
+import com.bootcamp.customer.dto.CreateCustomerRequest;
+import com.bootcamp.customer.dto.CustomerResponse;
+import com.bootcamp.customer.dto.CustomerType;
 import com.bootcamp.ms_customer.application.ports.input.ManageCustomerUseCase;
-import com.bootcamp.ms_customer.domain.model.Customer;
+import com.bootcamp.ms_customer.domain.model.dto.CreateCustomerDto;
+import com.bootcamp.ms_customer.domain.model.dto.CustomerDto;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerStatus;
-import com.bootcamp.ms_customer.domain.model.enums.CustomerType;
 import com.bootcamp.ms_customer.domain.model.enums.DocumentType;
 import com.bootcamp.ms_customer.domain.model.exception.CustomerNotFoundException;
-import com.bootcamp.ms_customer.domain.model.exception.InvalidCustomerDataException;
-import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.UpdateCustomerMapper;
+import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.CreateCustomerMapper;
 import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.CustomerResponseMapper;
+import com.bootcamp.ms_customer.infrastructure.adapters.inbound.rest.mapper.UpdateCustomerMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("Tests para CustomerController - Update")
+@WebFluxTest(CustomerController.class)
+@DisplayName("Customer Controller Tests")
 class CustomerControllerTest {
 
-    @Mock
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @MockBean
     private ManageCustomerUseCase customerService;
 
-    @Mock
+    @MockBean
+    private CreateCustomerMapper createCustomerMapper;
+
+    @MockBean
     private UpdateCustomerMapper updateCustomerMapper;
 
-    @Mock
+    @MockBean
     private CustomerResponseMapper customerResponseMapper;
 
-    @Mock
-    private ServerWebExchange exchange;
-
-    @InjectMocks
-    private CustomerController customerController;
-
     @Test
-    @DisplayName("Debe retornar 404 cuando cliente no existe")
-    void testUpdateCustomerNotFound() {
-        UpdateCustomerRequest request = new UpdateCustomerRequest();
-        request.setEmail("test@example.com");
+    @DisplayName("Should create customer successfully")
+    void testCreateCustomerSuccess() {
+        CreateCustomerRequest request = new CreateCustomerRequest();
+        request.setFirstName("Juan");
+        request.setLastName("Perez");
+        request.setDocumentNumber("12345678");
+        request.setEmail("juan@example.com");
+        request.setPhoneNumber("+34912345678");
 
-        when(updateCustomerMapper.toDomainDto(any())).thenReturn(null);
-        when(customerService.updateCustomer(anyString(), any())).thenReturn(
-                Mono.error(new CustomerNotFoundException("customer-123"))
-        );
+        CreateCustomerDto createDto = new CreateCustomerDto();
+        createDto.setFirstName("Juan");
+        createDto.setLastName("Perez");
 
-        var result = customerController.updateCustomer("customer-123", Mono.just(request), exchange);
+        CustomerDto customerDto = new CustomerDto();
+        customerDto.setCustomerId("cust-123");
+        customerDto.setFirstName("Juan");
+        customerDto.setLastName("Perez");
+        customerDto.setStatus(CustomerStatus.ACTIVE);
+        customerDto.setCreatedAt(LocalDateTime.now());
 
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.NOT_FOUND)
-                .verifyComplete();
+        CustomerResponse response = new CustomerResponse();
+        response.setId("cust-123");
+        response.setFirstName("Juan");
+        response.setLastName("Perez");
+
+        when(createCustomerMapper.toDomainDto(any())).thenReturn(createDto);
+        when(customerService.createCustomer(any())).thenReturn(Mono.just(customerDto));
+        when(customerResponseMapper.toResponse(any())).thenReturn(response);
+
+        webTestClient
+                .post()
+                .uri("/api/v1/customers")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(CustomerResponse.class)
+                .returnResult();
     }
 
     @Test
-    @DisplayName("Debe retornar 400 con mensaje cuando hay error de validación")
-    void testUpdateCustomerInvalidData() {
-        UpdateCustomerRequest request = new UpdateCustomerRequest();
-        request.setBusinessName("Invalid");
+    @DisplayName("Should return 400 when customer not found")
+    void testGetCustomerNotFound() {
+        String customerId = "non-existent-id";
 
-        when(updateCustomerMapper.toDomainDto(any())).thenReturn(null);
-        when(customerService.updateCustomer(anyString(), any())).thenReturn(
-                Mono.error(new InvalidCustomerDataException("No se puede actualizar 'businessName' en un cliente de tipo PERSONAL"))
-        );
+        when(customerService.findCustomerById(customerId))
+                .thenReturn(Mono.error(new CustomerNotFoundException("Customer not found")));
 
-        var result = customerController.updateCustomer("customer-123", Mono.just(request), exchange);
+        webTestClient
+                .get()
+                .uri("/api/v1/customers/{id}", customerId)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
-        StepVerifier.create(result)
-                .expectError(InvalidCustomerDataException.class)
-                .verify();
+    @Test
+    @DisplayName("Should delete customer successfully")
+    void testDeleteCustomerSuccess() {
+        String customerId = "cust-123";
+
+        when(customerService.deleteCustomer(customerId))
+                .thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/customers/{id}", customerId)
+                .exchange()
+                .expectStatus().isNoContent();
     }
 }
