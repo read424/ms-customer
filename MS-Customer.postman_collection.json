@@ -1,0 +1,254 @@
+{
+  "info": {
+    "_postman_id": "ms-customer-collection",
+    "name": "MS-Customer",
+    "description": "Customer Management Microservice API Collection\nAccessed through Service Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{customer_service_url}}/actuator/health",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "actuator",
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers?page=1&size=10",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers/{{customer_id}}",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{{customer_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Customer (Individual)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"12345678\",\n  \"email\": \"juan.perez@example.com\",\n  \"phoneNumber\": \"+34912345678\",\n  \"customerType\": \"PERSONAL\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Customer (Business)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"TechCorp S.A.\",\n  \"documentType\": \"RUC\",\n  \"documentNumber\": \"98765432\",\n  \"email\": \"contact@techcorp.com\",\n  \"phoneNumber\": \"+34934567890\",\n  \"customerType\": \"BUSINESS\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Juan Carlos\",\n  \"lastName\": \"Perez Garcia\",\n  \"email\": \"juancarlos@example.com\",\n  \"phoneNumber\": \"+34912345678\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers/{{customer_id}}",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{{customer_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{customer_service_url}}/api/v1/customers/{{customer_id}}",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{{customer_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Monitoring",
+      "item": [
+        {
+          "name": "Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{customer_service_url}}/actuator/metrics",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "actuator",
+                "metrics"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Prometheus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{customer_service_url}}/actuator/prometheus",
+              "host": [
+                "{{customer_service_url}}"
+              ],
+              "path": [
+                "actuator",
+                "prometheus"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "gateway_host",
+      "value": "http://localhost:8080",
+      "type": "string",
+      "description": "Service Gateway Base URL"
+    },
+    {
+      "key": "customer_service_url",
+      "value": "http://localhost:8081",
+      "type": "string",
+      "description": "MS-Customer Service URL (direct access, bypass gateway)"
+    },
+    {
+      "key": "customer_id",
+      "value": "customer-123",
+      "type": "string",
+      "description": "Customer ID (replace with actual customer ID)"
+    }
+  ]
+}
