@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: ms-customer
+  config:
+    import: optional:configserver:http://localhost:8888
+  cloud:
+    config:
+      enabled: false
+  data:
+    mongodb:
+      auto-index-creation: true
+      uri: mongodb://admin:bootcamp_customer_prod_2024@localhost:27017/ms_customer_test?authSource=admin
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
