@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 public class CustomerEntity {
 
     @Id
-    @Indexed(name = "idx_customerId", unique = true)
     private String customerId;
 
     @Indexed(name = "idx_customerType")
