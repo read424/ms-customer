@@ -28,8 +28,6 @@ public class CustomerService implements ManageCustomerUseCase {
     private final CachePort cachePort;
     private final SearchKeyGenerator searchKeyGenerator;
 
-    // ─── Use Cases ───────────────────────────────────────────────────────────
-
     @Override
     public Mono<Customer> createCustomer(CreateCustomerDto createDto) {
         Customer customer = customerDomainMapper.toCustomer(createDto);
