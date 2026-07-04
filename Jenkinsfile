@@ -70,14 +70,7 @@ pipeline {
         always {
             echo '📊 Generando reportes...'
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'target/site/jacoco',
-                reportFiles: 'index.html',
-                reportName: 'JaCoCo Coverage Report'
-            ])
+            archiveArtifacts allowEmptyArchive: true, artifacts: 'target/site/jacoco/**'
         }
         success {
             echo '✅ Pipeline ejecutado exitosamente'
