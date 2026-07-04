@@ -1,6 +1,6 @@
 package com.bootcamp.ms_customer.application.service;
 
-import com.bootcamp.ms_customer.application.mapper.CustomerDomainMapper;
+import com.bootcamp.ms_customer.domain.mapper.CustomerDomainMapper;
 import com.bootcamp.ms_customer.application.ports.input.ManageCustomerUseCase;
 import com.bootcamp.ms_customer.application.ports.output.CachePort;
 import com.bootcamp.ms_customer.application.ports.output.CustomerRepositoryPort;

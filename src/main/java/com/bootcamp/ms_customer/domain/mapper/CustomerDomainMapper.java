@@ -1,4 +1,4 @@
-package com.bootcamp.ms_customer.application.mapper;
+package com.bootcamp.ms_customer.domain.mapper;
 
 import com.bootcamp.ms_customer.domain.model.Customer;
 import com.bootcamp.ms_customer.domain.model.dto.CreateCustomerDto;
