@@ -39,14 +39,14 @@ import static org.mockito.Mockito.when;
 class CustomerControllerIntegrationTest {
 
     @Mock
-    private ManageCustomerUseCase customerService;
+    private ManageCustomerUseCase manageCustomerUseCase;
 
     private WebTestClient webTestClient;
 
     @BeforeEach
     void setup() {
         var controller = new CustomerController(
-                customerService,
+                manageCustomerUseCase,
                 new CreateCustomerMapperImpl(),
                 new UpdateCustomerMapperImpl(),
                 new CustomerResponseMapperImpl()
@@ -61,7 +61,7 @@ class CustomerControllerIntegrationTest {
     @DisplayName("should create customer successfully")
     void shouldCreateCustomerSuccessfully() {
         var customer = createTestCustomer();
-        when(customerService.createCustomer(any())).thenReturn(Mono.just(customer));
+        when(manageCustomerUseCase.createCustomer(any())).thenReturn(Mono.just(customer));
 
         var request = new CreateCustomerRequest();
         request.setFirstName("John");
@@ -87,7 +87,7 @@ class CustomerControllerIntegrationTest {
     @DisplayName("should find customer by id")
     void shouldFindCustomerById() {
         var customer = createTestCustomer();
-        when(customerService.findCustomerById("CUST-001")).thenReturn(Mono.just(customer));
+        when(manageCustomerUseCase.findCustomerById("CUST-001")).thenReturn(Mono.just(customer));
 
         webTestClient.get()
                 .uri("/api/v1/customers/CUST-001")
@@ -101,7 +101,7 @@ class CustomerControllerIntegrationTest {
     @Test
     @DisplayName("should return 400 when customer not found")
     void shouldReturn400WhenCustomerNotFound() {
-        when(customerService.findCustomerById("non-existent"))
+        when(manageCustomerUseCase.findCustomerById("non-existent"))
                 .thenReturn(Mono.error(new CustomerNotFoundException("Customer not found")));
 
         webTestClient.get()
@@ -126,7 +126,7 @@ class CustomerControllerIntegrationTest {
                 .isLast(true)
                 .build();
 
-        when(customerService.findCustomers(1, 10, null))
+        when(manageCustomerUseCase.findCustomers(1, 10, null))
                 .thenReturn(Mono.just(paginated));
 
         webTestClient.get()
@@ -154,7 +154,7 @@ class CustomerControllerIntegrationTest {
                 .isLast(true)
                 .build();
 
-        when(customerService.findCustomers(
+        when(manageCustomerUseCase.findCustomers(
                 eq(1), eq(10),
                 eq(com.bootcamp.ms_customer.domain.model.enums.CustomerType.PERSONAL)))
                 .thenReturn(Mono.just(paginated));
@@ -181,7 +181,7 @@ class CustomerControllerIntegrationTest {
                 .isLast(true)
                 .build();
 
-        when(customerService.findCustomers(1, 10, null))
+        when(manageCustomerUseCase.findCustomers(1, 10, null))
                 .thenReturn(Mono.just(paginated));
 
         webTestClient.get()
@@ -200,7 +200,7 @@ class CustomerControllerIntegrationTest {
         customer.setFirstName("Jane");
         customer.setLastName("Smith");
 
-        when(customerService.updateCustomer(eq("CUST-001"), any()))
+        when(manageCustomerUseCase.updateCustomer(eq("CUST-001"), any()))
                 .thenReturn(Mono.just(customer));
 
         var updateRequest = new UpdateCustomerRequest();
@@ -223,7 +223,7 @@ class CustomerControllerIntegrationTest {
     @Test
     @DisplayName("should return 404 when updating non-existent customer")
     void shouldReturn404WhenUpdatingNonExistentCustomer() {
-        when(customerService.updateCustomer(eq("non-existent"), any()))
+        when(manageCustomerUseCase.updateCustomer(eq("non-existent"), any()))
                 .thenReturn(Mono.error(new CustomerNotFoundException("Customer not found")));
 
         var updateRequest = new UpdateCustomerRequest();
@@ -241,7 +241,7 @@ class CustomerControllerIntegrationTest {
     @Test
     @DisplayName("should delete customer successfully")
     void shouldDeleteCustomerSuccessfully() {
-        when(customerService.deleteCustomer("CUST-001"))
+        when(manageCustomerUseCase.deleteCustomer("CUST-001"))
                 .thenReturn(Mono.empty());
 
         webTestClient.delete()
@@ -254,7 +254,7 @@ class CustomerControllerIntegrationTest {
     @DisplayName("should handle multiple create operations")
     void shouldHandleMultipleCreateOperations() {
         var customer = createTestCustomer();
-        when(customerService.createCustomer(any())).thenReturn(Mono.just(customer));
+        when(manageCustomerUseCase.createCustomer(any())).thenReturn(Mono.just(customer));
 
         var request = new CreateCustomerRequest();
         request.setFirstName("John");
@@ -287,7 +287,7 @@ class CustomerControllerIntegrationTest {
                 .isLast(true)
                 .build();
 
-        when(customerService.findCustomers(1, 10, null))
+        when(manageCustomerUseCase.findCustomers(1, 10, null))
                 .thenReturn(Mono.just(paginated));
 
         webTestClient.get()
@@ -316,7 +316,7 @@ class CustomerControllerIntegrationTest {
                 .isLast(false)
                 .build();
 
-        when(customerService.findCustomers(1, 2, null))
+        when(manageCustomerUseCase.findCustomers(1, 2, null))
                 .thenReturn(Mono.just(paginated));
 
         webTestClient.get()

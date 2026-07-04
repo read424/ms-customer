@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomerController implements CustomerApi {
 
-    private final ManageCustomerUseCase customerService;
+    private final ManageCustomerUseCase manageCustomerUseCase;
     private final CreateCustomerMapper createCustomerMapper;
     private final UpdateCustomerMapper updateCustomerMapper;
     private final CustomerResponseMapper customerResponseMapper;
@@ -33,7 +33,7 @@ public class CustomerController implements CustomerApi {
             Mono<CreateCustomerRequest> createCustomerRequest,
             ServerWebExchange exchange) {
         return createCustomerRequest
-                .flatMap(request -> customerService
+                .flatMap(request -> manageCustomerUseCase
                         .createCustomer(createCustomerMapper.toDomainDto(request))
                         .map(customerResponseMapper::toResponse)
                         .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response)));
@@ -52,7 +52,7 @@ public class CustomerController implements CustomerApi {
                 ? com.bootcamp.ms_customer.domain.model.enums.CustomerType.valueOf(type.name())
                 : null;
 
-        return customerService.findCustomers(pageNum, pageSize, domainType)
+        return manageCustomerUseCase.findCustomers(pageNum, pageSize, domainType)
                 .map(paginated -> {
                     CustomerPageResponse response = new CustomerPageResponse();
                     response.setContent(paginated.getContent().stream()
@@ -71,7 +71,7 @@ public class CustomerController implements CustomerApi {
     public Mono<ResponseEntity<CustomerResponse>> findCustomerById(
             String customerId,
             ServerWebExchange exchange) {
-        return customerService.findCustomerById(customerId)
+        return manageCustomerUseCase.findCustomerById(customerId)
                 .map(customerResponseMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .onErrorResume(error -> {
@@ -88,7 +88,7 @@ public class CustomerController implements CustomerApi {
             Mono<UpdateCustomerRequest> updateCustomerRequest,
             ServerWebExchange exchange) {
         return updateCustomerRequest
-                .flatMap(request -> customerService.updateCustomer(customerId, updateCustomerMapper.toDomainDto(request))
+                .flatMap(request -> manageCustomerUseCase.updateCustomer(customerId, updateCustomerMapper.toDomainDto(request))
                         .map(customerResponseMapper::toResponse)
                         .map(ResponseEntity::ok))
                 .onErrorResume(error -> {
@@ -103,7 +103,7 @@ public class CustomerController implements CustomerApi {
     public Mono<ResponseEntity<Void>> deleteCustomer(
             String customerId,
             ServerWebExchange exchange) {
-        return customerService.deleteCustomer(customerId)
+        return manageCustomerUseCase.deleteCustomer(customerId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
 }
