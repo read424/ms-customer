@@ -2,10 +2,10 @@ spring:
   application:
     name: ms-customer
   config:
-    import: ${SPRING_CONFIG_IMPORT:configserver:http://service-config-server:8888}
+    import: ${SPRING_CONFIG_IMPORT:}
   cloud:
     config:
-      enabled: true
+      enabled: ${SPRING_CLOUD_CONFIG_ENABLED:true}
   data:
     mongodb:
       auto-index-creation: true
