@@ -21,6 +21,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -53,7 +55,7 @@ class RedisCacheAdapterInternalConditionsTest {
                 .thenReturn(Mono.just(true));
 
         var result = PaginatedResult.<Customer>builder()
-                .content(java.util.Arrays.asList(createTestCustomer()))
+                .content(Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
                 .build();
 
@@ -132,7 +134,7 @@ class RedisCacheAdapterInternalConditionsTest {
     void shouldExecuteInstanceofBranchWhenValueIsPaginatedResult() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
         var cachedResult = PaginatedResult.<Customer>builder()
-                .content(java.util.Arrays.asList(createTestCustomer()))
+                .content(Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
                 .build();
         when(valueOperations.get("valid-key"))
@@ -194,7 +196,7 @@ class RedisCacheAdapterInternalConditionsTest {
         when(valueOperations.set(anyString(), any(), any()))
                 .thenReturn(Mono.just(true));
         var cachedResult = PaginatedResult.<Customer>builder()
-                .content(java.util.Arrays.asList(createTestCustomer()))
+                .content(Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
                 .build();
         when(valueOperations.get(anyString()))
@@ -203,7 +205,7 @@ class RedisCacheAdapterInternalConditionsTest {
                 .thenReturn(Mono.just(1L));
 
         var result = PaginatedResult.<Customer>builder()
-                .content(java.util.Arrays.asList(createTestCustomer()))
+                .content(Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
                 .build();
 

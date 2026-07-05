@@ -4,12 +4,9 @@ import com.bootcamp.ms_customer.domain.model.Customer;
 import com.bootcamp.ms_customer.domain.model.dto.CreateCustomerDto;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerType;
 import com.bootcamp.ms_customer.domain.model.enums.DocumentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.junit.jupiter.api.Assertions.*;

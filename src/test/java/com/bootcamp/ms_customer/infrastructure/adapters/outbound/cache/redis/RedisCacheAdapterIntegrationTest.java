@@ -1,11 +1,9 @@
 package com.bootcamp.ms_customer.infrastructure.adapters.outbound.cache.redis;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 
 import com.bootcamp.ms_customer.domain.model.Customer;
 import com.bootcamp.ms_customer.domain.model.dto.PaginatedResult;

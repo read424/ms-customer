@@ -229,7 +229,7 @@ class CustomerServiceTest {
 
         customerService.findCustomerById("CUST-001")
                 .as(StepVerifier::create)
-                .assertNext(found -> org.junit.jupiter.api.Assertions.assertEquals("CUST-001", found.getCustomerId()))
+                .assertNext(found -> assertEquals("CUST-001", found.getCustomerId()))
                 .verifyComplete();
     }
 
@@ -504,7 +504,7 @@ class CustomerServiceTest {
         var updateDto = new UpdateCustomerDto();
         updateDto.setDocumentNumber("87654321A");
 
-        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+        assertThrows(InvalidCustomerDataException.class, () -> {
             ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
         });
     }
@@ -515,7 +515,7 @@ class CustomerServiceTest {
         var updateDto = new UpdateCustomerDto();
         updateDto.setFirstName("NewName");
 
-        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+        assertThrows(InvalidCustomerDataException.class, () -> {
             ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
         });
     }
@@ -526,7 +526,7 @@ class CustomerServiceTest {
         var updateDto = new UpdateCustomerDto();
         updateDto.setLastName("NewLastName");
 
-        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+        assertThrows(InvalidCustomerDataException.class, () -> {
             ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
         });
     }
@@ -537,7 +537,7 @@ class CustomerServiceTest {
         var updateDto = new UpdateCustomerDto();
         updateDto.setBusinessName("NewBusinessName");
 
-        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+        assertThrows(InvalidCustomerDataException.class, () -> {
             ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
         });
     }
@@ -548,7 +548,7 @@ class CustomerServiceTest {
         var updateDto = new UpdateCustomerDto();
         updateDto.setEmail("newemail@example.com");
 
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
         });
     }
@@ -565,10 +565,10 @@ class CustomerServiceTest {
 
         ReflectionTestUtils.invokeMethod(customerService, "applyUpdateFields", customer, updateDto);
 
-        org.junit.jupiter.api.Assertions.assertEquals("Jane", customer.getFirstName());
-        org.junit.jupiter.api.Assertions.assertEquals("Smith", customer.getLastName());
-        org.junit.jupiter.api.Assertions.assertEquals("jane@example.com", customer.getEmail());
-        org.junit.jupiter.api.Assertions.assertEquals("+34987654321", customer.getPhoneNumber());
+        assertEquals("Jane", customer.getFirstName());
+        assertEquals("Smith", customer.getLastName());
+        assertEquals("jane@example.com", customer.getEmail());
+        assertEquals("+34987654321", customer.getPhoneNumber());
     }
 
     @Test
@@ -581,9 +581,9 @@ class CustomerServiceTest {
 
         ReflectionTestUtils.invokeMethod(customerService, "applyUpdateFields", customer, updateDto);
 
-        org.junit.jupiter.api.Assertions.assertEquals("John", customer.getFirstName());
-        org.junit.jupiter.api.Assertions.assertEquals(originalLastName, customer.getLastName());
-        org.junit.jupiter.api.Assertions.assertEquals("new@example.com", customer.getEmail());
+        assertEquals("John", customer.getFirstName());
+        assertEquals(originalLastName, customer.getLastName());
+        assertEquals("new@example.com", customer.getEmail());
     }
 
     // ──────────────────────────────────────────────────────────────────
