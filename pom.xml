@@ -255,6 +255,13 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<excludes>
+								<exclude>com/bootcamp/customer/**</exclude>
+								<exclude>com/bootcamp/ms_customer/infrastructure/config/**</exclude>
+								<exclude>org/openapitools/**</exclude>
+							</excludes>
+						</configuration>
 					</execution>
 					<execution>
 						<id>jacoco-check</id>
