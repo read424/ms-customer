@@ -51,7 +51,7 @@ pipeline {
             steps {
                 echo '🔍 Enviando análisis a SonarQube...'
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}'
+                    sh 'mvn jacoco:report sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}'
                 }
             }
         }
