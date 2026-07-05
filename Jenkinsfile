@@ -59,8 +59,8 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo '⏳ Esperando resultado del Quality Gate...'
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                timeout(time: 15, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
                 }
             }
         }

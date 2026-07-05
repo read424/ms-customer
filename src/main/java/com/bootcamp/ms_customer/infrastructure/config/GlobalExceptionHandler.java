@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @RestControllerAdvice
 @Slf4j
@@ -61,7 +62,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorResponse> buildErrorResponse(String message, HttpStatus status,
             String error, ServerWebExchange exchange) {
         ErrorResponse response = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now(ZoneId.of("UTC")))
                 .status(status.value())
                 .error(error)
                 .message(message)

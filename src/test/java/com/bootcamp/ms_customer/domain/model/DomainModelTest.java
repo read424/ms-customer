@@ -86,14 +86,14 @@ class DomainModelTest {
             result.setPageSize(20);
             result.setTotalElements(150);
             result.setTotalPages(8);
-            result.setLast(true);
+            result.setLast(false);
 
             assertEquals(3, result.getContent().size());
             assertEquals(2, result.getPageNumber());
             assertEquals(20, result.getPageSize());
             assertEquals(150, result.getTotalElements());
             assertEquals(8, result.getTotalPages());
-            assertTrue(result.isLast());
+            assertFalse(result.isLast());
         }
 
         @Test

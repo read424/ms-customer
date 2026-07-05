@@ -468,6 +468,7 @@ class CustomerServiceTest {
     // ──────────────────────────────────────────────────────────────────
 
     private Customer createCustomer(String id, String firstName, String lastName, String documentNumber, CustomerType type) {
+        LocalDateTime fixedTime = LocalDateTime.of(2026, 7, 4, 12, 0, 0);
         return Customer.builder()
                 .customerId(id)
                 .firstName(firstName)
@@ -478,8 +479,8 @@ class CustomerServiceTest {
                 .email("email@example.com")
                 .phoneNumber("+34912345678")
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(fixedTime)
+                .updatedAt(fixedTime)
                 .build();
     }
 }
