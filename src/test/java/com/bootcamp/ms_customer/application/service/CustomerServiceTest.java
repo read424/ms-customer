@@ -18,6 +18,7 @@ import com.bootcamp.ms_customer.domain.mapper.CustomerDomainMapper;
 import com.bootcamp.ms_customer.domain.model.Customer;
 import com.bootcamp.ms_customer.domain.model.dto.CreateCustomerDto;
 import com.bootcamp.ms_customer.domain.model.dto.PaginatedResult;
+import reactor.core.publisher.Flux;
 import com.bootcamp.ms_customer.domain.model.dto.UpdateCustomerDto;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerStatus;
 import com.bootcamp.ms_customer.domain.model.enums.CustomerType;
@@ -462,6 +463,37 @@ class CustomerServiceTest {
                 .as(StepVerifier::create)
                 .expectError(CustomerNotFoundException.class)
                 .verify();
+    }
+
+    @Test
+    @DisplayName("should get all customers successfully")
+    void shouldGetAllCustomersSuccessfully() {
+        var customer1 = createCustomer("CUST-001", "John", "Doe", "12345678A", CustomerType.PERSONAL);
+        var customer2 = createCustomer("CUST-002", "Jane", "Smith", "87654321B", CustomerType.PERSONAL);
+
+        when(customerRepositoryPort.getAllCustomers())
+                .thenReturn(Flux.just(customer1, customer2));
+
+        customerService.findAllCustomers()
+                .as(StepVerifier::create)
+                .expectNext(customer1)
+                .expectNext(customer2)
+                .verifyComplete();
+
+        verify(customerRepositoryPort).getAllCustomers();
+    }
+
+    @Test
+    @DisplayName("should return empty flux when no customers exist")
+    void shouldReturnEmptyFluxWhenNoCustomersExist() {
+        when(customerRepositoryPort.getAllCustomers())
+                .thenReturn(Flux.empty());
+
+        customerService.findAllCustomers()
+                .as(StepVerifier::create)
+                .verifyComplete();
+
+        verify(customerRepositoryPort).getAllCustomers();
     }
 
     // ──────────────────────────────────────────────────────────────────
