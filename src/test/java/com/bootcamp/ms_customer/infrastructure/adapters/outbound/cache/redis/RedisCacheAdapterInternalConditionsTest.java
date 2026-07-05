@@ -1,13 +1,9 @@
 package com.bootcamp.ms_customer.infrastructure.adapters.outbound.cache.redis;
 
-import java.time.Duration;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -27,7 +23,6 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +49,6 @@ class RedisCacheAdapterInternalConditionsTest {
     @DisplayName("should execute if(success) when set returns true in cacheCustomerListBySearchKey")
     void shouldExecuteSuccessConditionWhenCachingSucceeds() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
-        // Retornar true para que if (success) sea verdadero
         when(valueOperations.set(anyString(), any(), any()))
                 .thenReturn(Mono.just(true));
 
@@ -66,14 +60,12 @@ class RedisCacheAdapterInternalConditionsTest {
         adapter.cacheCustomerListBySearchKey("test-key", result)
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (success) { log.debug(...) } se ejecutó
     }
 
     @Test
     @DisplayName("should NOT execute if(success) block when set returns false")
     void shouldNotExecuteSuccessConditionWhenSetReturnsFalse() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
-        // Retornar false para que if (success) sea falso
         when(valueOperations.set(anyString(), any(), any()))
                 .thenReturn(Mono.just(false));
 
@@ -85,7 +77,6 @@ class RedisCacheAdapterInternalConditionsTest {
         adapter.cacheCustomerListBySearchKey("test-key", result)
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (success) { log.debug(...) } NO se ejecutó (success es false)
     }
 
     @Test
@@ -93,14 +84,12 @@ class RedisCacheAdapterInternalConditionsTest {
     void shouldExecuteDeletedConditionWhenKeysAreDeleted() {
         when(reactiveRedisTemplate.keys(anyString()))
                 .thenReturn(Flux.just("key1", "key2", "key3"));
-        // Retornar 1 para que if (deleted > 0) sea verdadero
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(1L));
 
         adapter.invalidateAllCustomerListCaches()
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (deleted > 0) { log.debug(...) } se ejecutó 3 veces
     }
 
     @Test
@@ -108,40 +97,34 @@ class RedisCacheAdapterInternalConditionsTest {
     void shouldNotExecuteDeletedConditionWhenNothingDeleted() {
         when(reactiveRedisTemplate.keys(anyString()))
                 .thenReturn(Flux.just("key1"));
-        // Retornar 0 para que if (deleted > 0) sea falso
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(0L));
 
         adapter.invalidateAllCustomerListCaches()
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (deleted > 0) { log.debug(...) } NO se ejecutó (deleted es 0)
     }
 
     @Test
     @DisplayName("should execute if(deleted > 0) in invalidateCustomerDetailCache")
     void shouldExecuteDeletedConditionInDetailInvalidation() {
-        // Retornar 1 para que if (deleted > 0) sea verdadero
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(1L));
 
         adapter.invalidateCustomerDetailCache("CUST-123")
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (deleted > 0) { log.debug(...) } se ejecutó
     }
 
     @Test
     @DisplayName("should NOT execute if(deleted > 0) in invalidateCustomerDetailCache when nothing deleted")
     void shouldNotExecuteDeletedConditionInDetailWhenNothingDeleted() {
-        // Retornar 0 para que if (deleted > 0) sea falso
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(0L));
 
         adapter.invalidateCustomerDetailCache("CUST-123")
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (deleted > 0) { log.debug(...) } NO se ejecutó (deleted es 0)
     }
 
     @Test
@@ -158,7 +141,6 @@ class RedisCacheAdapterInternalConditionsTest {
         adapter.getCustomerListBySearchKey("valid-key")
                 .as(StepVerifier::create)
                 .assertNext(result -> {
-                    // if (value instanceof PaginatedResult<?>) se ejecutó y retornó Optional.of()
                 })
                 .verifyComplete();
     }
@@ -167,14 +149,12 @@ class RedisCacheAdapterInternalConditionsTest {
     @DisplayName("should execute else branch when value is NOT PaginatedResult")
     void shouldExecuteElseBranchWhenValueNotPaginatedResult() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
-        // Devolver un String en lugar de PaginatedResult
         when(valueOperations.get("invalid-key"))
                 .thenReturn(Mono.just("not a paginated result"));
 
         adapter.getCustomerListBySearchKey("invalid-key")
                 .as(StepVerifier::create)
                 .assertNext(result -> {
-                    // La rama else se ejecutó: return Mono.just(Optional.empty())
                 })
                 .verifyComplete();
     }
@@ -183,9 +163,8 @@ class RedisCacheAdapterInternalConditionsTest {
     @DisplayName("should execute try-catch block when ClassCastException occurs")
     void shouldExecuteTryCatchWhenCastFails() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
-        // Crear un objeto que causará ClassCastException en el cast
         when(valueOperations.get("cast-error-key"))
-                .thenReturn(Mono.just(new Integer(123))); // Integer en lugar de PaginatedResult
+                .thenReturn(Mono.just(Integer.valueOf(123))); // Integer en lugar de PaginatedResult
 
         adapter.getCustomerListBySearchKey("cast-error-key")
                 .as(StepVerifier::create)
@@ -200,24 +179,20 @@ class RedisCacheAdapterInternalConditionsTest {
     void shouldExecuteDeletedConditionMultipleTimes() {
         when(reactiveRedisTemplate.keys(anyString()))
                 .thenReturn(Flux.just("key1", "key2", "key3", "key4", "key5"));
-        // Algunos retornan 1 (deleted > 0), otros retornan 0
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(1L), Mono.just(0L), Mono.just(1L), Mono.just(0L), Mono.just(1L));
 
         adapter.invalidateAllCustomerListCaches()
                 .as(StepVerifier::create)
                 .verifyComplete();
-        // if (deleted > 0) se ejecutó en las iteraciones 1, 3, 5
     }
 
     @Test
     @DisplayName("should execute all branches in complete cache flow")
     void shouldExecuteAllBranchesInCompleteCacheFlow() {
         when(reactiveRedisTemplate.opsForValue()).thenReturn(valueOperations);
-        // First call: set with success=true
         when(valueOperations.set(anyString(), any(), any()))
                 .thenReturn(Mono.just(true));
-        // Second call: get returns valid cached data
         var cachedResult = PaginatedResult.<Customer>builder()
                 .content(java.util.Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
@@ -227,7 +202,6 @@ class RedisCacheAdapterInternalConditionsTest {
         when(reactiveRedisTemplate.delete(anyString()))
                 .thenReturn(Mono.just(1L));
 
-        // Cache
         var result = PaginatedResult.<Customer>builder()
                 .content(java.util.Arrays.asList(createTestCustomer()))
                 .pageNumber(1).pageSize(10).totalElements(1).totalPages(1).isLast(true)
@@ -237,13 +211,11 @@ class RedisCacheAdapterInternalConditionsTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
 
-        // Get
         adapter.getCustomerListBySearchKey("flow-key")
                 .as(StepVerifier::create)
                 .assertNext(cached -> {})
                 .verifyComplete();
 
-        // Delete
         adapter.invalidateCustomerDetailCache("CUST-001")
                 .as(StepVerifier::create)
                 .verifyComplete();
