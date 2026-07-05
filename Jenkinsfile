@@ -9,6 +9,9 @@ pipeline {
     environment {
         SONAR_PROJECT_KEY = 'ms-customer'
         SONAR_HOST_URL = 'http://sonarqube:9000'
+
+        ACR_NAME = 'bootcamplabacr.azurecr.io'
+        IMAGE_NAME = 'ms-customer'
     }
 
     stages {
@@ -51,7 +54,7 @@ pipeline {
             steps {
                 echo '🔍 Enviando análisis a SonarQube...'
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn jacoco:report sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}'
+                    sh 'mvn clean verify jacoco:report sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}'
                 }
             }
         }
@@ -60,7 +63,48 @@ pipeline {
             steps {
                 echo '⏳ Esperando resultado del Quality Gate...'
                 timeout(time: 15, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                script {
+
+                    env.BASE_VERSION = sh(
+                        script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
+                        returnStdout: true
+                    ).trim()
+
+                    env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    env.IMAGE_VERSION = "${env.BASE_VERSION}-${env.BUILD_NUMBER}"
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'azure-acr',
+                            usernameVariable: 'ACR_USER',
+                            passwordVariable: 'ACR_PASSWORD'
+                        )
+                    ]) {
+
+                        sh """
+                            echo $ACR_PASSWORD | docker login ${ACR_NAME} \
+                                --username $ACR_USER \
+                                --password-stdin
+
+                            docker build \
+                              -t ${ACR_NAME}/${IMAGE_NAME}:latest \
+                              -t ${ACR_NAME}/${IMAGE_NAME}:${IMAGE_VERSION} \
+                              -t ${ACR_NAME}/${IMAGE_NAME}:${GIT_SHA} \
+                              .
+
+                            docker push ${ACR_NAME}/${IMAGE_NAME}:latest
+                            docker push ${ACR_NAME}/${IMAGE_NAME}:${IMAGE_VERSION}
+                            docker push ${ACR_NAME}/${IMAGE_NAME}:${GIT_SHA}
+                        """
+                    }
                 }
             }
         }
