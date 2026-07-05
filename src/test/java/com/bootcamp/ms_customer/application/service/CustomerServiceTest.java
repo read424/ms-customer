@@ -5,6 +5,8 @@ import java.time.Month;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.springframework.test.util.ReflectionTestUtils;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -494,6 +496,94 @@ class CustomerServiceTest {
                 .verifyComplete();
 
         verify(customerRepositoryPort).getAllCustomers();
+    }
+
+    @Test
+    @DisplayName("should fail validating business customer update with documentNumber")
+    void shouldFailValidatingBusinessCustomerUpdateWithDocumentNumber() {
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setDocumentNumber("87654321A");
+
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+            ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should fail validating business customer update with firstName")
+    void shouldFailValidatingBusinessCustomerUpdateWithFirstName() {
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setFirstName("NewName");
+
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+            ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should fail validating business customer update with lastName")
+    void shouldFailValidatingBusinessCustomerUpdateWithLastName() {
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setLastName("NewLastName");
+
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+            ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should fail validating business customer update with businessName")
+    void shouldFailValidatingBusinessCustomerUpdateWithBusinessName() {
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setBusinessName("NewBusinessName");
+
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidCustomerDataException.class, () -> {
+            ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should pass validating business customer update with email only")
+    void shouldPassValidatingBusinessCustomerUpdateWithEmailOnly() {
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setEmail("newemail@example.com");
+
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+            ReflectionTestUtils.invokeMethod(customerService, "validateBusinessCustomerUpdate", updateDto);
+        });
+    }
+
+    @Test
+    @DisplayName("should apply update fields for personal customer")
+    void shouldApplyUpdateFieldsForPersonalCustomer() {
+        var customer = createCustomer("CUST-001", "John", "Doe", "12345678A", CustomerType.PERSONAL);
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setFirstName("Jane");
+        updateDto.setLastName("Smith");
+        updateDto.setEmail("jane@example.com");
+        updateDto.setPhoneNumber("+34987654321");
+
+        ReflectionTestUtils.invokeMethod(customerService, "applyUpdateFields", customer, updateDto);
+
+        org.junit.jupiter.api.Assertions.assertEquals("Jane", customer.getFirstName());
+        org.junit.jupiter.api.Assertions.assertEquals("Smith", customer.getLastName());
+        org.junit.jupiter.api.Assertions.assertEquals("jane@example.com", customer.getEmail());
+        org.junit.jupiter.api.Assertions.assertEquals("+34987654321", customer.getPhoneNumber());
+    }
+
+    @Test
+    @DisplayName("should apply partial update fields")
+    void shouldApplyPartialUpdateFields() {
+        var customer = createCustomer("CUST-001", "John", "Doe", "12345678A", CustomerType.PERSONAL);
+        var originalLastName = customer.getLastName();
+        var updateDto = new UpdateCustomerDto();
+        updateDto.setEmail("new@example.com");
+
+        ReflectionTestUtils.invokeMethod(customerService, "applyUpdateFields", customer, updateDto);
+
+        org.junit.jupiter.api.Assertions.assertEquals("John", customer.getFirstName());
+        org.junit.jupiter.api.Assertions.assertEquals(originalLastName, customer.getLastName());
+        org.junit.jupiter.api.Assertions.assertEquals("new@example.com", customer.getEmail());
     }
 
     // ──────────────────────────────────────────────────────────────────
