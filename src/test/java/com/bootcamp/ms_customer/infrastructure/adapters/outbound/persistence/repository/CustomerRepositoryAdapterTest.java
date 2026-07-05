@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Tests para CustomerRepositoryAdapter")
 class CustomerRepositoryAdapterTest {
+    private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.JULY, 4, 12, 0, 0);
 
     @Mock
     private SpringDataCustomerRepository springDataRepository;
@@ -47,8 +49,8 @@ class CustomerRepositoryAdapterTest {
                 .documentNumber("12345678")
                 .firstName("Juan")
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
 
         CustomerEntity entity = CustomerEntity.builder()
@@ -58,8 +60,8 @@ class CustomerRepositoryAdapterTest {
                 .documentNumber("12345678")
                 .firstName("Juan")
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
 
         when(customerPersistenceMapper.toEntity(customer)).thenReturn(entity);

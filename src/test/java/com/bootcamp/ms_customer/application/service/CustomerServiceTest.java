@@ -1,6 +1,7 @@
 package com.bootcamp.ms_customer.application.service;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -468,7 +469,7 @@ class CustomerServiceTest {
     // ──────────────────────────────────────────────────────────────────
 
     private Customer createCustomer(String id, String firstName, String lastName, String documentNumber, CustomerType type) {
-        LocalDateTime fixedTime = LocalDateTime.of(2026, 7, 4, 12, 0, 0);
+        LocalDateTime fixedTime = LocalDateTime.of(2026, Month.JULY, 4, 12, 0, 0);
         return Customer.builder()
                 .customerId(id)
                 .firstName(firstName)

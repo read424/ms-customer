@@ -6,9 +6,11 @@ import com.bootcamp.ms_customer.domain.model.enums.CustomerType;
 import com.bootcamp.ms_customer.domain.model.enums.DocumentType;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.UUID;
 
 public class CustomerTestFixture {
+    private static final LocalDateTime FIXED_TIME = LocalDateTime.of(2026, Month.JULY, 4, 12, 0, 0);
 
     public static Customer createValidPersonalCustomer() {
         return Customer.builder()
@@ -21,8 +23,8 @@ public class CustomerTestFixture {
                 .phoneNumber("+34912345678")
                 .customerType(CustomerType.PERSONAL)
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
     }
 
@@ -37,8 +39,8 @@ public class CustomerTestFixture {
                 .phoneNumber("+34912345678")
                 .customerType(CustomerType.PERSONAL)
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
     }
 
@@ -52,8 +54,8 @@ public class CustomerTestFixture {
                 .phoneNumber("+34912345678")
                 .customerType(CustomerType.BUSINESS)
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
     }
 
@@ -67,8 +69,8 @@ public class CustomerTestFixture {
                 .phoneNumber("+34912345678")
                 .customerType(CustomerType.BUSINESS)
                 .status(CustomerStatus.ACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
     }
 
@@ -83,8 +85,8 @@ public class CustomerTestFixture {
                 .phoneNumber("+34912345679")
                 .customerType(CustomerType.PERSONAL)
                 .status(CustomerStatus.INACTIVE)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .createdAt(FIXED_TIME)
+                .updatedAt(FIXED_TIME)
                 .build();
     }
 
