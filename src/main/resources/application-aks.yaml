@@ -1,0 +1,25 @@
+spring:
+  config:
+    import: ""
+  cloud:
+    discovery:
+      enabled: false
+    config:
+      enabled: false
+  data:
+    mongodb:
+      host: ${SPRING_DATA_MONGODB_HOST}
+      port: ${SPRING_DATA_MONGODB_PORT}
+      database: ${SPRING_DATA_MONGODB_DATABASE}
+      authentication-database: admin
+      username: ${SPRING_DATA_MONGODB_USERNAME}
+      password: ${SPRING_DATA_MONGODB_PASSWORD}
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false

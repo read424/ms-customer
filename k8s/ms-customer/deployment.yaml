@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ms-customer
+  labels:
+    app: ms-customer
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: ms-customer
+
+  template:
+    metadata:
+      labels:
+        app: ms-customer
+
+    spec:
+      containers:
+        - name: ms-customer
+          image: bootcamplabacr.azurecr.io/ms-customer:1.0.0
+
+          ports:
+            - containerPort: 8081
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_PROFILES_ACTIVE
+
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: "false"
+
+            # -------------------
+            # MONGODB
+            # -------------------
+            - name: SPRING_DATA_MONGODB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_MONGODB_HOST
+
+            - name: SPRING_DATA_MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_MONGODB_PORT
+
+            - name: SPRING_DATA_MONGODB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_MONGODB_DB
+
+            - name: SPRING_DATA_MONGODB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_MONGODB_USER
+
+            - name: SPRING_DATA_MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ms-customer-secret
+                  key: SPRING_MONGODB_PASSWORD
+
+            # -------------------
+            # REDIS
+            # -------------------
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_REDIS_HOST
+
+            - name: SPRING_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-customer-config
+                  key: SPRING_REDIS_PORT
+
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ms-customer-secret
+                  key: SPRING_REDIS_PASSWORD
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          imagePullPolicy: Always

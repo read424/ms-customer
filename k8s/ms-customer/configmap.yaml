@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: ms-customer-config
+
+data:
+  SPRING_PROFILES_ACTIVE: "aks"
+
+  SPRING_MONGODB_HOST: "mongodb"
+  SPRING_MONGODB_PORT: "27017"
+  SPRING_MONGODB_DB: "ms_customer_prod"
+
+  SPRING_REDIS_HOST: "redis"
+  SPRING_REDIS_PORT: "6379"

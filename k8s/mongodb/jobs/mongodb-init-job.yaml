@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+
+metadata:
+  name: mongodb-init
+
+spec:
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: mongo-init
+          image: mongo:8.3.4
+
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_INITDB_ROOT_USERNAME
+
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: MONGO_INITDB_ROOT_PASSWORD
+
+          command:
+            - /bin/bash
+            - -c
+
+          args:
+            - |
+              echo "Waiting for MongoDB..."
+              until mongosh "mongodb://mongodb:27017/admin" \
+                -u "$MONGO_INITDB_ROOT_USERNAME" \
+                -p "$MONGO_INITDB_ROOT_PASSWORD" \
+                --authenticationDatabase admin \
+                --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+                sleep 3
+              done
+
+              echo "MongoDB is ready. Initializing database..."
+
+              mongosh "mongodb://mongodb:27017/admin" \
+                -u "$MONGO_INITDB_ROOT_USERNAME" \
+                -p "$MONGO_INITDB_ROOT_PASSWORD" \
+                --authenticationDatabase admin <<EOF
+
+              use ms_customer_prod;
+
+              db.createUser({
+                user: "customer_user",
+                pwd: "customer_pass",
+                roles: [
+                  { role: "readWrite", db: "ms_customer_prod" }
+                ]
+              });
+
+              print("Database and user created successfully");
+              EOF
