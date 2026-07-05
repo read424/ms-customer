@@ -69,7 +69,7 @@ pipeline {
     post {
         always {
             echo '📊 Generando reportes...'
-            junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+            junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             archiveArtifacts allowEmptyArchive: true, artifacts: 'target/site/jacoco/**'
         }
         success {
