@@ -183,13 +183,25 @@ class RedisCacheAdapterIntegrationTest extends AbstractCacheAdapterIntegrationTe
     }
 
     @Test
-    @DisplayName("should recover from cache errors gracefully")
+    @DisplayName("should recover from cache errors by handling missing data gracefully")
     void shouldRecoverFromCacheErrors() {
         var adapter = getBean(RedisCacheAdapter.class);
         var keyGenerator = getBean(SearchKeyGenerator.class);
-        var searchKey = keyGenerator.generateSearchKey(1, 10, null);
+        var customer = createTestCustomer();
+        var paginatedResult = PaginatedResult.<Customer>builder()
+                .content(Arrays.asList(customer))
+                .pageNumber(1)
+                .pageSize(10)
+                .totalElements(1)
+                .totalPages(1)
+                .isLast(true)
+                .build();
 
-        adapter.getCustomerListBySearchKey(searchKey)
+        var searchKey = keyGenerator.generateSearchKey(1, 10, CustomerType.PERSONAL);
+
+        adapter.cacheCustomerListBySearchKey(searchKey, paginatedResult)
+                .then(adapter.invalidateAllCustomerListCaches())
+                .then(adapter.getCustomerListBySearchKey(searchKey))
                 .as(StepVerifier::create)
                 .assertNext(result -> assertThat(result).isEmpty())
                 .verifyComplete();
@@ -250,7 +262,6 @@ class RedisCacheAdapterIntegrationTest extends AbstractCacheAdapterIntegrationTe
                 .build();
 
         var key1 = keyGenerator.generateSearchKey(1, 10, CustomerType.PERSONAL);
-        var key2 = keyGenerator.generateSearchKey(1, 10, CustomerType.BUSINESS);
 
         adapter.cacheCustomerListBySearchKey(key1, result)
                 .then(adapter.getCustomerListBySearchKey(key1))

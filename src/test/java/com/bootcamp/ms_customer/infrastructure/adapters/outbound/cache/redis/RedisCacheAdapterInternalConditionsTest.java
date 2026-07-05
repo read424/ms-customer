@@ -171,7 +171,6 @@ class RedisCacheAdapterInternalConditionsTest {
         adapter.getCustomerListBySearchKey("cast-error-key")
                 .as(StepVerifier::create)
                 .assertNext(result -> {
-                    // catch (ClassCastException e) se ejecutó y retornó Optional.empty()
                 })
                 .verifyComplete();
     }

@@ -38,7 +38,7 @@ public class SearchKeyGenerator {
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new IllegalStateException("SHA-256 algorithm not available in this environment", e);
         }
     }
 
