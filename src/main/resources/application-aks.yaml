@@ -31,3 +31,9 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   show-actuator: false
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
