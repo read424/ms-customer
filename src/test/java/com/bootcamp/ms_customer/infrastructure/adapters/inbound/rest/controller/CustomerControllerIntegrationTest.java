@@ -14,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import com.bootcamp.customer.dto.CreateCustomerRequest;
 import com.bootcamp.customer.dto.CustomerResponse;
-import com.bootcamp.customer.dto.CustomerType;
+import com.bootcamp.customer.dto.CustomerTypeRequest;
 import com.bootcamp.customer.dto.DocumentType;
 import com.bootcamp.customer.dto.UpdateCustomerRequest;
 import com.bootcamp.ms_customer.application.ports.input.ManageCustomerUseCase;
@@ -69,7 +69,7 @@ class CustomerControllerIntegrationTest {
         request.setDocumentType(DocumentType.DNI);
         request.setEmail("john@example.com");
         request.setPhoneNumber("+34912345678");
-        request.setCustomerType(CustomerType.PERSONAL);
+        request.setCustomerType(CustomerTypeRequest.PERSONAL);
 
         webTestClient.post()
                 .uri("/api/v1/customers")
@@ -262,7 +262,7 @@ class CustomerControllerIntegrationTest {
         request.setDocumentType(DocumentType.DNI);
         request.setEmail("john@example.com");
         request.setPhoneNumber("+34912345678");
-        request.setCustomerType(CustomerType.PERSONAL);
+        request.setCustomerType(CustomerTypeRequest.PERSONAL);
 
         for (int i = 0; i < 3; i++) {
             webTestClient.post()
