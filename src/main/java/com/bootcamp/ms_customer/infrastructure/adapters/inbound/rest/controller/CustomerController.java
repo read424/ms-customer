@@ -4,7 +4,7 @@ import com.bootcamp.customer.api.CustomerApi;
 import com.bootcamp.customer.dto.CreateCustomerRequest;
 import com.bootcamp.customer.dto.CustomerPageResponse;
 import com.bootcamp.customer.dto.CustomerResponse;
-import com.bootcamp.customer.dto.CustomerType;
+import com.bootcamp.customer.dto.CustomerTypeRequest;
 import com.bootcamp.customer.dto.UpdateCustomerRequest;
 import com.bootcamp.ms_customer.application.ports.input.ManageCustomerUseCase;
 import com.bootcamp.ms_customer.domain.model.exception.CustomerNotFoundException;
@@ -43,7 +43,7 @@ public class CustomerController implements CustomerApi {
     public Mono<ResponseEntity<CustomerPageResponse>> findAllCustomers(
             Integer page,
             Integer size,
-            CustomerType type,
+            CustomerTypeRequest type,
             ServerWebExchange exchange) {
 
         int pageNum = (page != null) ? page : 1;

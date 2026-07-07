@@ -31,7 +31,7 @@ paths:
           in: query
           required: false
           schema:
-            $ref: '#/components/schemas/CustomerType'
+            $ref: '#/components/schemas/CustomerTypeRequest'
       responses:
         '200':
           description: Customers found
@@ -119,7 +119,7 @@ components:
         - documentNumber
       properties:
         customerType:
-          $ref: '#/components/schemas/CustomerType'
+          $ref: '#/components/schemas/CustomerTypeRequest'
         documentType:
           $ref: '#/components/schemas/DocumentType'
         documentNumber:
@@ -142,7 +142,7 @@ components:
         customerId:
           type: string
         customerType:
-          $ref: '#/components/schemas/CustomerType'
+          $ref: '#/components/schemas/CustomerTypeRequest'
         documentType:
           $ref: '#/components/schemas/DocumentType'
         documentNumber:
@@ -181,7 +181,7 @@ components:
           type: string
           description: Updatable for both PERSONAL and BUSINESS customers
 
-    CustomerType:
+    CustomerTypeRequest:
       type: string
       enum:
         - PERSONAL
