@@ -10,9 +10,6 @@ spring:
     mongodb:
       auto-index-creation: true
   redis:
-    host: ${SPRING_REDIS_HOST:localhost}
-    port: ${SPRING_REDIS_PORT:6379}
-    password: ${SPRING_REDIS_PASSWORD:}
     timeout: 60s
   jackson:
     default-property-inclusion: non_null
