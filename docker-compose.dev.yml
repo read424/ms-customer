@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+
+  ms-customer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bootcamplabacr.azurecr.io/ms-customer:dev
+    container_name: ms-customer-dev
+    ports:
+      - "18081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: aks
+      SPRING_CLOUD_CONFIG_ENABLED: false
+      SPRING_DATA_MONGODB_HOST: mongodb-customer
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: ms_customer_prod
+      SPRING_DATA_MONGODB_USERNAME: admin
+      SPRING_DATA_MONGODB_PASSWORD: bootcamp_customer_prod_2024
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      JAVA_OPTS: -Xmx512m -Xms256m
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - bootcamp-network
+
+networks:
+  bootcamp-network:
+    name: bootcamp-network
+    external: true
