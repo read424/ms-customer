@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import java.time.LocalDateTime;
@@ -48,6 +49,17 @@ public class GlobalExceptionHandler {
             ServerWebExchange exchange) {
         log.warn("Error de decodificación JSON: {}", ex.getMessage());
         return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, "Error de Decodificación JSON", exchange);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            ServerWebExchange exchange) {
+        if (exchange.getRequest().getPath().value().contains("favicon.ico")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        log.warn("Recurso no encontrado: {}", ex.getMessage());
+        return buildErrorResponse("Recurso no encontrado", HttpStatus.NOT_FOUND, "No Encontrado", exchange);
     }
 
     @ExceptionHandler(Exception.class)
