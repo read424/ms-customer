@@ -9,8 +9,8 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-  redis:
-    timeout: 60s
+    redis:
+      timeout: 60s
   jackson:
     default-property-inclusion: non_null
     serialization:
