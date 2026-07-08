@@ -9,7 +9,6 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: mongodb://admin:bootcamp_customer_prod_2024@localhost:27017/ms_customer_test?authSource=admin
   jackson:
     default-property-inclusion: non_null
     serialization:

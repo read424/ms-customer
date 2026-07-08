@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: ms-customer
-          image: bootcamplabacr.azurecr.io/ms-customer:1.1.2-22
+          image: bootcamplabacr.azurecr.io/ms-customer:1.1.3-33
 
           ports:
             - containerPort: 8081
